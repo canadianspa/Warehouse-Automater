@@ -16,7 +16,7 @@ public class Warehouse {
 		this.space = space;
 	}
 
-	public int placeItem(Item i, int zone)
+	public void placeItem(Item i, int zone) throws Exception
 	{	
 		//only place if space availaible 
 		if(zones.get(zone).size() < space.get(zone))
@@ -27,15 +27,16 @@ public class Warehouse {
 				{
 					if(it.id == i.id)
 					{
-						return -1;
+						throw new Exception("Item Already Stored");
 					}
 				}
 			}
-			zones.get(zone).add(i);
-			return 0;
-			
+			zones.get(zone).add(i);			
 		}
-		return -1;
+		else
+		{
+			throw new Exception("No Space Available");
+		}
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
@@ -102,7 +103,7 @@ public class Warehouse {
 		}
 		return count;
 	}
-	
+
 	public ArrayList<Double> currentRatio()
 	{
 		ArrayList<Double> ratios = new ArrayList<Double>();
@@ -113,13 +114,9 @@ public class Warehouse {
 		}
 		return ratios;
 	}
-	
-	public Double testZone(Item i, int zone)
+
+	public Double testZone(Item i, int zone) throws Exception
 	{
-		if(zones.get(zone).size() > space.get(zone))
-		{
-			return -1.0;
-		}
 		placeItem(i,zone);
 		for(int z = 0; z  < RatioFinder.skus.size(); z ++)
 		{
@@ -130,7 +127,56 @@ public class Warehouse {
 				return ratios.get(z);
 			}
 		}
-		return -1.0;
+		throw new Exception("SKU not found");
+
+	}
+	
+	public int findBestZone(Item i) throws Exception
+	{
+		Double closest = 1.0;
+		int bestZone = -1;
+		Double optimal = -1.0;
+		for(int z = 0; z  < RatioFinder.skus.size(); z ++)
+		{
+			if(RatioFinder.skus.get(z).equals(i.sku))
+			{
+				optimal = RatioFinder.ratios.get(z);
+			}
+		}
+		if(optimal == -1.0)
+		{
+			throw new Exception("Could get optimal ratio");
+		}
+		for(int z = 0; z < zones.size(); z ++)
+		{
+			try {
+				Double currentTest = testZone(i,z);
+				if(optimal > currentTest)
+				{
+					if(optimal - currentTest < closest)
+					{
+						closest = optimal - currentTest;
+						bestZone = z;
+					}
+				}
+				else
+				{
+					if(currentTest - optimal < closest)
+					{
+						closest = currentTest - optimal;
+						bestZone = z;
+					}
+				}
+				
+			} catch (Exception e) {
+			}
+			
+		}
+		if(bestZone == -1)
+		{
+			throw new Exception("Warehouse Full?");
+		}
+		return bestZone;
 	}
 
 
