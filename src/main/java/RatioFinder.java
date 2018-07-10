@@ -13,8 +13,8 @@ public class RatioFinder {
 	public static void tester()
 	{
 		skus.add("KK-10");
-		skus.add("KK-33");
-		skus.add("KK-66");
+		skus.add("KH-33");
+		skus.add("KP-66");
 		ratios.add(0.6);
 		ratios.add(0.3);
 		ratios.add(0.1);
